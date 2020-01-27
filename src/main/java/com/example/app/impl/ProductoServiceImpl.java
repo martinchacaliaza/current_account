@@ -14,6 +14,7 @@ import com.example.app.dao.TipoProductoDao;
 import com.example.app.models.Client;
 import com.example.app.models.CreditAccount;
 import com.example.app.models.CurrentAccount;
+
 import com.example.app.models.TypeCurrentAccount;
 import com.example.app.service.ProductoService;
 import com.example.app.service.TipoProductoService;
@@ -55,9 +56,9 @@ public class ProductoServiceImpl implements ProductoService {
 	}
 
 	@Override
-	public Mono<CurrentAccount> retiro(Double monto, String numTarjeta, Double comision) {
+	public Mono<CurrentAccount> retiro(Double monto, String numTarjeta, Double comision, String codigo_bancario) {
 
-		return productoDao.viewNumTarjeta(numTarjeta).flatMap(c -> {
+		return productoDao.viewNumTarjeta(numTarjeta, codigo_bancario).flatMap(c -> {
 
 			if (monto < c.getSaldo()) {
 				c.setSaldo((c.getSaldo() - monto) - comision);
@@ -69,8 +70,8 @@ public class ProductoServiceImpl implements ProductoService {
 	}
 
 	@Override
-	public Mono<CurrentAccount> depositos(Double monto, String numTarjeta, Double comision) {
-		return productoDao.viewNumTarjeta(numTarjeta).flatMap(c -> {
+	public Mono<CurrentAccount> depositos(Double monto, String numTarjeta, Double comision, String codigo_bancario) {
+		return productoDao.viewNumTarjeta(numTarjeta, codigo_bancario).flatMap(c -> {
 			c.setSaldo((c.getSaldo() + monto) - comision);
 			return productoDao.save(c);
 		});
@@ -94,36 +95,33 @@ public class ProductoServiceImpl implements ProductoService {
 			return false;
 
 		}).flatMap(f -> {	
-			Mono<CreditAccount> cred = WebClient.builder()
+			Flux<CreditAccount> cred = WebClient.builder()
 					.baseUrl("http://" + valor + "/productos_creditos/api/ProductoCredito/").build().get()
-					.uri("/dni/"+f.getDni()).retrieve().bodyToMono(CreditAccount.class).log();
+					.uri("/dni/"+f.getDni()).retrieve().bodyToFlux(CreditAccount.class).log();
 			
+			//if(cred.getClass()==null) {throw new RequestException("el cliente tiene deuda, no puede adquirir un producto");}
 			
-			return cred.flatMap(cre -> {
-
-				Mono<CreditAccount> operas = WebClient.builder()
-						.baseUrl("http://" + valor + "/productos_creditos/api/" + "OperCuentasCorrientes/").build().get()
-						.uri("/consultaRangoFecha/" + cre.getFecha_cierre() +
-								"&&"+cre.getFecha_cierre()).retrieve().bodyToMono(CreditAccount.class).log();
-				
-				
-				
-				
-				return operas.flatMap(oper -> {
-				
+			return cred.flatMap(oper -> {
+					if(oper.getConsumo()>0 ) {
+						
+						throw new RequestException("el cliente tiene deuda, no puede adquirir un producto");
+						
+					}else {
+					
 				Mono<Client> cli = WebClient.builder().baseUrl("http://" + valor + "/clientes/api/Clientes/").build()
 						.get().uri("/dni/" + f.getDni()).retrieve().bodyToMono(Client.class).log();
 				return cli.flatMap(p -> {
 
 					if (!p.getCodigo_bancario().equalsIgnoreCase(f.getCodigo_bancario())) {
 
-						throw new RequestException("el cliente no pertenece a la entedida bancaria del producto");
+						throw new RequestException("el cliente no pertenece a la entidad bancaria del producto");
 
 					} else {
 
 						if (p.getTipoCliente().getIdTipo().equalsIgnoreCase("1")) {
 
-							Mono<Long> valor = productoDao.viewDniCliente2(f.getDni(), f.getTipoProducto().getIdTipo())
+							Mono<Long> valor = productoDao.viewDniCliente2(f.getDni(), f.getTipoProducto().getIdTipo()
+									,f.getCodigo_bancario())
 									.count();
 
 							return valor.flatMap(f2 -> {
@@ -131,15 +129,6 @@ public class ProductoServiceImpl implements ProductoService {
 									if (!f.getTipoProducto().getIdTipo().equalsIgnoreCase("1")
 											&& !f.getTipoProducto().getIdTipo().equalsIgnoreCase("2")
 											&& !f.getTipoProducto().getIdTipo().equalsIgnoreCase("3")) {
-
-										/*
-										 * CurrentAccount f1 = new CurrentAccount(); f1.setDni(f.getDni());
-										 * f1.setNumero_cuenta(f.getNumero_cuenta());
-										 * f1.setFecha_afiliacion(f.getFecha_afiliacion());
-										 * f1.setFecha_caducidad(f.getFecha_caducidad()); f1.setSaldo(f.getSaldo());
-										 * f1.setUsuario(f.getClave()); f1.setClave(f.getClave());
-										 * f1.setCodigo_bancario(f.getCodigo_bancario());
-										 */
 
 										TypeCurrentAccount t = new TypeCurrentAccount();
 										t.setIdTipo(f.getTipoProducto().getIdTipo());
@@ -154,23 +143,11 @@ public class ProductoServiceImpl implements ProductoService {
 									}
 								} else {
 
-									/*
-									 * CurrentAccount f1 = new CurrentAccount();
-									 * 
-									 * f1.setDni(f.getDni()); f1.setNumero_cuenta(f.getNumero_cuenta());
-									 * f1.setFecha_afiliacion(f.getFecha_afiliacion());
-									 * f1.setFecha_caducidad(f.getFecha_caducidad()); f1.setSaldo(f.getSaldo());
-									 * f1.setUsuario(f.getClave()); f1.setClave(f.getClave());
-									 * f1.setCodigo_bancario(f.getCodigo_bancario());
-									 */
-
 									TypeCurrentAccount t = new TypeCurrentAccount();
 									t.setIdTipo(f.getTipoProducto().getIdTipo());
 									t.setDescripcion(f.getTipoProducto().getDescripcion());
 									f.setTipoProducto(t);
-
 									return productoDao.save(f);
-
 								}
 							});
 
@@ -255,16 +232,20 @@ public class ProductoServiceImpl implements ProductoService {
 					return Mono.empty();
 
 				});
+				}
+				
 			});
+					
 		});
-			});
+		
+
 
 	}
 
 	@Override
-	public Mono<CurrentAccount> listProdNumTarj(String num) {
+	public Mono<CurrentAccount> listProdNumTarj(String num, String codigo_bancario) {
 
-		return productoDao.viewNumTarjeta(num);
+		return productoDao.viewNumTarjeta(num, codigo_bancario);
 	}
 
 	@Override
@@ -272,5 +253,14 @@ public class ProductoServiceImpl implements ProductoService {
 		// TODO Auto-generated method stub
 		return productoDao.save(producto);
 	}
+
+	@Override
+	public Flux<CurrentAccount> consultaProductosTiempo(Date from, Date to, String codigo_banco) {
+		// TODO Auto-generated method stub
+		return productoDao.consultaProductoBanco(from, to, codigo_banco);
+	}
+
+
+	
 
 }

@@ -27,7 +27,6 @@ public class CreditAccount {
 	@NotEmpty
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private String fecha_caducidad;
-	
 	@NotEmpty
 	private Double credito;
 	@NotEmpty
@@ -38,7 +37,8 @@ public class CreditAccount {
 	private String usuario;
 	@NotEmpty
 	private String clave;
-	
+	@NotEmpty
+	private String codigo_bancario;
 
 	
 	//private tipoProducto tipoCliente;
