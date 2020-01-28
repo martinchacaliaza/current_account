@@ -30,6 +30,8 @@ public interface ProductoService {
 	
 	Mono<CurrentAccount> depositos(Double monto, String numero_cuenta, Double comision, String codigo_bancario);
 	
+	Mono<CurrentAccount> depositos(Double monto, String numero_cuenta, String codigo_bancario);
+	
 	Flux<CurrentAccount> consultaProductosTiempo(Date from, Date to, String codigo_banco);
 
 

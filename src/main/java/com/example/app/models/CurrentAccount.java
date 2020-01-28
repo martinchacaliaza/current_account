@@ -34,8 +34,8 @@ public class CurrentAccount {
 	private TypeCurrentAccount tipoProducto;
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date fecha_afiliacion;
-	@NotEmpty
-	private String fecha_caducidad;
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private Date fecha_caducidad;
 	@NotEmpty
 	private double saldo;
 	@NotEmpty
@@ -44,10 +44,13 @@ public class CurrentAccount {
 	private String clave;
 	@NotEmpty
 	private String codigo_bancario;
-
 	@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy")
 	public Date fecha_afiliacion() {
 		return fecha_afiliacion;
+	}
+	@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy")
+	public Date fecha_caducidad() {
+		return fecha_caducidad;
 	}
 }
 

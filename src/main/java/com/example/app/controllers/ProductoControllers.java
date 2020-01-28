@@ -5,6 +5,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+import javax.management.RuntimeErrorException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +25,7 @@ import com.example.app.models.TypeCurrentAccount;
 import com.example.app.service.ProductoService;
 import com.example.app.service.TipoProductoService;
 
+import io.swagger.annotations.ApiOperation;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -29,15 +33,13 @@ import reactor.core.publisher.Mono;
 @RestController
 public class ProductoControllers {
 
-	
-	
 	@Autowired
 	private ProductoService productoService;
 
 	@Autowired
 	private TipoProductoService tipoProductoService;
 
-	// Muestra todos las cuentas bancarias existentes
+	@ApiOperation(value = "Muestra todos las cuentas bancarias existentes", notes="")
 	@GetMapping
 	public Mono<ResponseEntity<Flux<CurrentAccount>>> findAll() {
 		return Mono.just(
@@ -46,7 +48,7 @@ public class ProductoControllers {
 		);
 	}
 
-	// Filtra todas cuentas bancarias por id
+	@ApiOperation(value = "Filtra todas cuentas bancarias por id", notes="")
 	@GetMapping("/{id}")
 	public Mono<ResponseEntity<CurrentAccount>> viewId(@PathVariable String id) {
 		return productoService.findByIdProducto(id)
@@ -54,15 +56,16 @@ public class ProductoControllers {
 				.defaultIfEmpty(ResponseEntity.notFound().build());
 	}
 
-	// actualiza cuenta bancaria
+
+	@ApiOperation(value = "Actualiza cuenta bancaria", notes="")
 	@PutMapping
 	public Mono<CurrentAccount> updateProducto(@RequestBody CurrentAccount producto) {
 
 		return productoService.saveProducto(producto);
 	}
 
-	// actualiza al momento de hacer la transaccion desde servicio
-	// operaciones(movimientos)
+	@ApiOperation(value = "actualiza al momento de hacer la transaccion[RETIRO] desde servicio"
+			+ " operaciones(movimientos)", notes="")
 	@PutMapping("/retiro/{numero_cuenta}/{monto}/{comision}/{codigo_bancario}")
 	public Mono<CurrentAccount> retiroBancario(@PathVariable Double monto, @PathVariable String numero_cuenta,
 			@PathVariable Double comision, @PathVariable String codigo_bancario) {
@@ -70,8 +73,18 @@ public class ProductoControllers {
 		return productoService.retiro(monto, numero_cuenta, comision, codigo_bancario);
 	}
 
-	// actualiza al momento de hacer la transaccion desde servicio
-	// operaciones(movimientos)
+	
+	@ApiOperation(value = "Actualiza al momento de hacer la transaccion [DEPOSITO] desde servicio"
+			+ " operaciones(movimientos)", notes="")
+	@PutMapping("/depositoTransf/{numero_Cuenta}/{monto}/{codigo_bancario}")
+	public Mono<CurrentAccount> despositoTransf(@PathVariable Double monto, @PathVariable String numero_Cuenta,
+			@PathVariable Double comision,  @PathVariable String codigo_bancario) {
+
+		return productoService.depositos(monto, numero_Cuenta, codigo_bancario);
+	}
+
+	@ApiOperation(value = "Actualiza al momento de hacer la transaccion [DEPOSITO] desde servicio"
+			+ " operaciones(movimientos)  cobrando comision si realiza varias transacciones", notes="")
 	@PutMapping("/deposito/{numero_Cuenta}/{monto}/{comision}/{codigo_bancario}")
 	public Mono<CurrentAccount> despositoBancario(@PathVariable Double monto, @PathVariable String numero_Cuenta,
 			@PathVariable Double comision,  @PathVariable String codigo_bancario) {
@@ -79,56 +92,49 @@ public class ProductoControllers {
 		return productoService.depositos(monto, numero_Cuenta, comision, codigo_bancario);
 	}
 
-	/*
-	 * Guarda o Crea una tarjeta bancaria(tipo: ahorro, plazo fijo ....) - si el
-	 * cliente ya tiene un tipo de cuenta bancaria no debe de registrarlo
-	 */
+
+
+	@ApiOperation(value = "GUARDA CON VALIDANDO SEGUN LAS REGLAS DEL NEGOCIO", notes="")
 	@PostMapping
 	public Flux<CurrentAccount> saveProducto(@RequestBody List<CurrentAccount> pro) {
 		return productoService.saveProductoList(pro);
+				//switchIfEmpty( Mono.error(new RuntimeException("Revisar Datos")));
 	}
-	
-	// Muestra la cuenta bancaria por el numero de tarjeta y entidad bancaria
+
+	@ApiOperation(value = "Muestra la cuenta bancaria por el numero de tarjeta y entidad bancaria", notes="")
 	@GetMapping("/numero_cuenta/{num}/{codigo_bancario}")
 	public Mono<CurrentAccount> listProdNumTarj(@PathVariable String num, @PathVariable String codigo_bancario) {
 		Mono<CurrentAccount> producto = productoService.listProdNumTarj(num, codigo_bancario);
 		return producto;
 	}
 
-	// Muestra todos los poductos de cuentas de credito de un cliente
+	@ApiOperation(value = "Muestra todos los poductos de cuentas de credito de un cliente", notes="")
 	@GetMapping("/dni/{dni}")
 	public Flux<CurrentAccount> listProductoByDicliente(@PathVariable String dni) {
 		Flux<CurrentAccount> producto = productoService.findAllProductoByDniCliente(dni);
 		return producto;
 	}
 
-	// Muestra los saldos de las cuentas de un cliente
-	// se consulta por el numero de cuenta
+	@ApiOperation(value = "Muestra los saldos de las cuentas de un cliente"
+			+ " se consulta por el numero de cuenta", notes="")
 	@GetMapping("/SaldosBancarios/{numero_cuenta}/{codigo_bancario}")
 	public Mono<dtoCurrentAccount> SaldosBancarios(@PathVariable String numero_cuenta, String codigo_bancario) {
-
 		Mono<CurrentAccount> oper = productoService.listProdNumTarj(numero_cuenta, codigo_bancario);
-
 		return oper.flatMap(c -> {
-
 			dtoCurrentAccount pp = new dtoCurrentAccount();
 			TypeCurrentAccount tp = new TypeCurrentAccount();
-			
 			tp.setIdTipo(c.getTipoProducto().getIdTipo());
 			tp.setDescripcion(c.getTipoProducto().getDescripcion());
-			
-			
 			pp.setDni(c.getDni());
 			pp.setNumero_cuenta(c.getNumero_cuenta());
 			pp.setSaldo(c.getSaldo());
 			pp.setTipoProducto(tp);
-
 			return Mono.just(pp);
 		});
 
 	}
-	
-	//Reporte 
+
+	@ApiOperation(value = "REPORTE POR RANGO DE FECHAS", notes="")
 	@GetMapping("consultaRangoFecha/{fecha1}/{codigo_banco}")
 	public Flux<CurrentAccount> consultaProductosTiempo(@PathVariable String fecha1, @PathVariable String codigo_banco) throws ParseException{
 		

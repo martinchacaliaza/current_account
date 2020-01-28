@@ -17,7 +17,7 @@ import reactor.core.publisher.Mono;
 public interface ProductoDao extends ReactiveMongoRepository<CurrentAccount, String> {
 
 	
-	@Query("{ 'dni' : ?0 , 'tipoProducto.idTipo' : ?1, 'codigo_bancario': ?2}")
+	@Query("{ 'dni' : ?0 , 'tipoProducto.idTipo' : ?1 , 'codigo_bancario': ?2 }")
 	Flux<CurrentAccount> viewDniCliente2(String dni, String idTipo, String codigo_bancario);
 	
 	
