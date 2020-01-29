@@ -38,6 +38,15 @@ public class TipoProductoControllers {
 	}
 	
 	
+	@GetMapping("id/{id}")
+	public Mono<ResponseEntity<TypeCurrentAccount>> viewId2(@PathVariable String id){
+		return tipoProductosService.viewidTipo(id).map(p-> ResponseEntity.ok()
+				.contentType(MediaType.APPLICATION_JSON_UTF8)
+				.body(p))
+				.defaultIfEmpty(ResponseEntity.notFound().build());	
+	}
+	
+	
 	@GetMapping("/{id}")
 	public Mono<ResponseEntity<TypeCurrentAccount>> viewId(@PathVariable String id){
 		return tipoProductosService.findByIdTipoProducto(id).map(p-> ResponseEntity.ok()
@@ -45,6 +54,7 @@ public class TipoProductoControllers {
 				.body(p))
 				.defaultIfEmpty(ResponseEntity.notFound().build());	
 	}
+	
 	
 	@PutMapping
 	public Mono<TypeCurrentAccount> updateProducto(@RequestBody TypeCurrentAccount tipoProducto)
@@ -61,6 +71,8 @@ public class TipoProductoControllers {
 			return tipoProductosService.deleteTipo(t).then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)));		
 		}).defaultIfEmpty(new ResponseEntity<Void>(HttpStatus.NO_CONTENT));
 	}
+	
+	
 	
 	@PostMapping
 	public Mono<TypeCurrentAccount> saveTipoProducto(@RequestBody TypeCurrentAccount tipoProducto)

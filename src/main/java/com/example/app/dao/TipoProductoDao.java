@@ -7,10 +7,11 @@ import com.example.app.models.CurrentAccount;
 import com.example.app.models.TypeCurrentAccount;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public interface TipoProductoDao extends ReactiveMongoRepository<TypeCurrentAccount, String> {
 
 	
 	@Query("{ 'idTipo' : ?0 }")
-	Flux<CurrentAccount> viewidTipo(String idTipo);
+	Mono<TypeCurrentAccount> viewidTipo(String idTipo);
 }

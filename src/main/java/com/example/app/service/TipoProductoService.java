@@ -15,5 +15,6 @@ public interface TipoProductoService {
 	Mono<TypeCurrentAccount> findByIdTipoProducto(String id);
 	Mono<TypeCurrentAccount> saveTipoProducto(TypeCurrentAccount tipoProducto);
 	Mono<Void> deleteTipo(TypeCurrentAccount tipoProducto);
+	Mono<TypeCurrentAccount> viewidTipo(String id);
 	
 }

@@ -44,6 +44,8 @@ public class CurrentAccount {
 	private String clave;
 	@NotEmpty
 	private String codigo_bancario;
+	
+	
 	@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy")
 	public Date fecha_afiliacion() {
 		return fecha_afiliacion;

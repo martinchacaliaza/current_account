@@ -24,10 +24,18 @@ public class tipoProductoServiceImpl implements TipoProductoService{
 	return tipoProductoDao.findAll();
 	
 	}
+	
 	@Override
 	public Mono<TypeCurrentAccount> findByIdTipoProducto(String id)
 	{
 	return tipoProductoDao.findById(id);
+	
+	}
+	
+	@Override
+	public Mono<TypeCurrentAccount> viewidTipo(String id)
+	{
+	return tipoProductoDao.viewidTipo(id);
 	
 	}
 	

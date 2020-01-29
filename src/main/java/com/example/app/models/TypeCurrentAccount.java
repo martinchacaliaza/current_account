@@ -10,14 +10,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@Document(collection ="tipocuenta")
+@Document(collection ="tipoCuenta")
 
 public class TypeCurrentAccount {
-
-	
 	@NotEmpty
 	private String idTipo;
 	@NotEmpty
-	private String descripcion;
-	
+	private String descripcion;	
 }
