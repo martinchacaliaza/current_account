@@ -103,141 +103,118 @@ public class ProductoServiceImpl implements ProductoService {
 			}
 			return false;
 		}).flatMap(f -> {
-			
-			/*Mono<TypeCurrentAccount> aa= tipoProductoDao.viewidTipo(f.getTipoProducto().getIdTipo());
-			aa.flatMap(tip->{		
-				System.out.println("---------->" );
-				f.setTipoProducto(tip);
-				return Mono.just(tip);
-			
-			});
-				*/
-			
-			Mono<Long> cred = WebClient.builder()
-					.baseUrl("http://" + valor + "/productos_creditos/api/ProductoCredito/").build().get()
-					.uri("/dniDeuda/" + f.getDni()).retrieve().bodyToFlux(CreditAccount.class).count();
-			return cred.flatMap(oper -> {
-				if (oper > 0) {
-				
+			Mono<TypeCurrentAccount> aa = tipoProductoDao.viewidTipo(f.getTipoProducto().getIdTipo());
+			return aa.flatMap(tip -> {
+
+				Mono<Long> cred = WebClient.builder()
+						.baseUrl("http://" + valor + "/productos_creditos/api/ProductoCredito/").build().get()
+						.uri("/dniDeuda/" + f.getDni()).retrieve().bodyToFlux(CreditAccount.class).count();
+				return cred.flatMap(oper -> {
+					if (oper > 0) {
+
 						throw new RequestException("el cliente tiene deuda en una cuenta credito");
-				
-					}	
-				Mono<Client> cli = WebClient.builder().baseUrl("http://" + valor + "/clientes/api/Clientes/").build()
-						.get().uri("/dni/" + f.getDni()).retrieve().bodyToMono(Client.class);
 
-				return cli.defaultIfEmpty(new Client()).flatMap(p -> {
-					if (p.getDni() == null) {
-						throw new RequestException("cliente no existe, verificar");
-				
-					} else {
+					}
+					Mono<Client> cli = WebClient.builder().baseUrl("http://" + valor + "/clientes/api/Clientes/")
+							.build().get().uri("/dni/" + f.getDni()).retrieve().bodyToMono(Client.class);
 
-						if (!p.getCodigo_bancario().equalsIgnoreCase(f.getCodigo_bancario())) {
-
-							throw new RequestException("el cliente no pertenece a la entidad bancaria del producto");
+					return cli.defaultIfEmpty(new Client()).flatMap(p -> {
+						if (p.getDni() == null) {
+							throw new RequestException("cliente no existe, verificar");
 
 						} else {
 
-							if (p.getTipoCliente().getIdTipo().equalsIgnoreCase("1")) {
+							if (!p.getCodigo_bancario().equalsIgnoreCase(f.getCodigo_bancario())) {
 
-								Mono<Long> valor = productoDao.viewDniCliente2(f.getDni(),
-										f.getTipoProducto().getIdTipo(), f.getCodigo_bancario()).count();
+								throw new RequestException(
+										"el cliente no pertenece a la entidad bancaria del producto");
 
-								return valor.flatMap(f2 -> {
-									if (f2 >= 1) {
-										if (!f.getTipoProducto().getIdTipo().equalsIgnoreCase("1")
-												&& !f.getTipoProducto().getIdTipo().equalsIgnoreCase("2")
-												&& !f.getTipoProducto().getIdTipo().equalsIgnoreCase("3")) {
+							} else {
 
-											/*TypeCurrentAccount t = new TypeCurrentAccount();
-											t.setIdTipo(f.getTipoProducto().getIdTipo());
-											t.setDescripcion(f.getTipoProducto().getDescripcion());
-											f.setTipoProducto(t);*/
-											
-											
-											return productoDao.save(f);
+								if (p.getTipoCliente().getIdTipo().equalsIgnoreCase("1")) {
 
+									Mono<Long> valor = productoDao.viewDniCliente2(f.getDni(),
+											f.getTipoProducto().getIdTipo(), f.getCodigo_bancario()).count();
+
+									return valor.flatMap(f2 -> {
+										if (f2 >= 1) {
+											if (!f.getTipoProducto().getIdTipo().equalsIgnoreCase("1")
+													&& !f.getTipoProducto().getIdTipo().equalsIgnoreCase("2")
+													&& !f.getTipoProducto().getIdTipo().equalsIgnoreCase("3")) {
+
+												f.setTipoProducto(tip);
+												return productoDao.save(f);
+
+											} else {
+												throw new RequestException(
+														"El Cliente ya tiene una cuenta bancaria de ese tipo");
+											}
 										} else {
-											throw new RequestException(
-													"El Cliente ya tiene una cuenta bancaria de ese tipo");
+
+											f.setTipoProducto(tip);
+											return productoDao.save(f);
 										}
+									});
+								} else if (p.getTipoCliente().getIdTipo().equalsIgnoreCase("2")) {
+									if (!f.getTipoProducto().getIdTipo().equalsIgnoreCase("2")) {
+
+										throw new RequestException(
+												"Cliente Empresarial no puede tener cuenta de ese tipo");
+									}
+									/*
+									 * TypeCurrentAccount t = new TypeCurrentAccount();
+									 * t.setIdTipo(f.getTipoProducto().getIdTipo());
+									 * t.setDescripcion(f.getTipoProducto().getDescripcion()); f.setTipoProducto(t);
+									 */
+
+									return productoDao.save(f);
+
+								} else if (p.getTipoCliente().getIdTipo().equalsIgnoreCase("3")) {
+									if (!f.getTipoProducto().getIdTipo().equalsIgnoreCase("4")
+											&& !f.getTipoProducto().getIdTipo().equalsIgnoreCase("5")
+											&& !f.getTipoProducto().getIdTipo().equalsIgnoreCase("8")) {
+										throw new RequestException(
+												"Un Cliente Personal VIP" + " no puede tener este tipo de cuenta");
+									} else if (!(f.getSaldo() >= 20)) {
+
+										throw new RequestException("La cuenta se apertura con un saldo mayor a S/.20");
 									} else {
-										/*TypeCurrentAccount t = new TypeCurrentAccount();
-										t.setIdTipo(f.getTipoProducto().getIdTipo());
-										t.setDescripcion(f.getTipoProducto().getDescripcion());
-										f.setTipoProducto(t);*/
-									
+
+										f.setTipoProducto(tip);
 										return productoDao.save(f);
 									}
-								});
-							} else if (p.getTipoCliente().getIdTipo().equalsIgnoreCase("2")) {
-								if (!f.getTipoProducto().getIdTipo().equalsIgnoreCase("2")) {
+								} else if (p.getTipoCliente().getIdTipo().equalsIgnoreCase("4")) {
+									if (!f.getTipoProducto().getIdTipo().equalsIgnoreCase("6")) {
+										throw new RequestException(
+												"Un Cliente Empresarial PYME" + " no puede tener este tipo de cuenta");
+									} else if (!(f.getSaldo() >= 50)) {
+										throw new RequestException("La cuenta se apertura con un saldo mayor a S/.50");
+									} else {
 
-									throw new RequestException("Cliente Empresarial no puede tener cuenta de ese tipo");
-								}
-								/*TypeCurrentAccount t = new TypeCurrentAccount();
-								t.setIdTipo(f.getTipoProducto().getIdTipo());
-								t.setDescripcion(f.getTipoProducto().getDescripcion());
-								f.setTipoProducto(t);*/
-								
-								return productoDao.save(f);
-								
-							} else if (p.getTipoCliente().getIdTipo().equalsIgnoreCase("3")) {
-								if (!f.getTipoProducto().getIdTipo().equalsIgnoreCase("4")
-										&& !f.getTipoProducto().getIdTipo().equalsIgnoreCase("5")
-										&& !f.getTipoProducto().getIdTipo().equalsIgnoreCase("8")) {
-									throw new RequestException(
-											"Un Cliente Personal VIP" + " no puede tener este tipo de cuenta");
-								} else if (!(f.getSaldo() >= 20)) {
+										f.setTipoProducto(tip);
+										return productoDao.save(f);
+									}
+								} else if (p.getTipoCliente().getIdTipo().equalsIgnoreCase("5")) {
+									if (!f.getTipoProducto().getIdTipo().equalsIgnoreCase("7")) {
+										throw new RequestException("Un Cliente Empresarial Corporativo"
+												+ " no puede tener este tipo de cuenta");
+									} else if (!(f.getSaldo() >= 100)) {
+										throw new RequestException("La cuenta se apertura con un saldo mayor a S/.100");
+									} else {
 
-									throw new RequestException("La cuenta se apertura con un saldo mayor a S/.20");
-								} else {
-									/*TypeCurrentAccount t = new TypeCurrentAccount();
-									t.setIdTipo(f.getTipoProducto().getIdTipo());
-									t.setDescripcion(f.getTipoProducto().getDescripcion());
-									f.setTipoProducto(t);*/
-								
-									return productoDao.save(f);
-								}
-							} else if (p.getTipoCliente().getIdTipo().equalsIgnoreCase("4")) {
-								if (!f.getTipoProducto().getIdTipo().equalsIgnoreCase("6")) {
-									throw new RequestException(
-											"Un Cliente Empresarial PYME" + " no puede tener este tipo de cuenta");
-								} else if (!(f.getSaldo() >= 50)) {
-									throw new RequestException("La cuenta se apertura con un saldo mayor a S/.50");
-								} else {
-									/*TypeCurrentAccount t = new TypeCurrentAccount();
-									t.setIdTipo(f.getTipoProducto().getIdTipo());
-									t.setDescripcion(f.getTipoProducto().getDescripcion());
-									f.setTipoProducto(t);*/
-								
-									return productoDao.save(f);
-								}
-							} else if (p.getTipoCliente().getIdTipo().equalsIgnoreCase("5")) {
-								if (!f.getTipoProducto().getIdTipo().equalsIgnoreCase("7")) {
-									throw new RequestException("Un Cliente Empresarial Corporativo"
-											+ " no puede tener este tipo de cuenta");
-								} else if (!(f.getSaldo() >= 100)) {
-									throw new RequestException("La cuenta se apertura con un saldo mayor a S/.100");
-								} else {
-									/*TypeCurrentAccount t = new TypeCurrentAccount();
-									t.setIdTipo(f.getTipoProducto().getIdTipo());
-									t.setDescripcion(f.getTipoProducto().getDescripcion());
-									f.setTipoProducto(t);*/
-							
-									return productoDao.save(f);
+										f.setTipoProducto(tip);
+										return productoDao.save(f);
+									}
 								}
 							}
 						}
-					}
-					return Mono.empty();
+						return Mono.empty();
+					});
 				});
 			});
-			
-		
-			
+
 		});
-			
-		
+
 	}
 
 	@Override
