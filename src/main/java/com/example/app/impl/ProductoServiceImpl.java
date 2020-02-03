@@ -52,13 +52,13 @@ public class ProductoServiceImpl implements ProductoService {
 	@Override
 	public Flux<CurrentAccount> findAllProductoByDniCliente(String dniCliente) {
 
-		return productoDao.viewDniCliente(dniCliente);
+		return productoDao.findByDni(dniCliente);
 	}
 
 	@Override
 	public Mono<CurrentAccount> retiro(Double monto, String numTarjeta, Double comision, String codigo_bancario) {
 
-		return productoDao.viewNumTarjeta(numTarjeta, codigo_bancario).flatMap(c -> {
+		return productoDao.consultaNumCuentaByCodBanc(numTarjeta, codigo_bancario).flatMap(c -> {
 
 			if (monto <= c.getSaldo()) {
 				c.setSaldo((c.getSaldo() - monto) - comision);
@@ -72,7 +72,7 @@ public class ProductoServiceImpl implements ProductoService {
 
 	@Override
 	public Mono<CurrentAccount> depositos(Double monto, String numTarjeta, String codigo_bancario) {
-		return productoDao.viewNumTarjeta(numTarjeta, codigo_bancario).flatMap(c -> {
+		return productoDao.consultaNumCuentaByCodBanc(numTarjeta, codigo_bancario).flatMap(c -> {
 			c.setSaldo((c.getSaldo() + monto));
 			return productoDao.save(c);
 		});
@@ -80,7 +80,7 @@ public class ProductoServiceImpl implements ProductoService {
 
 	@Override
 	public Mono<CurrentAccount> depositos(Double monto, String numTarjeta, Double comision, String codigo_bancario) {
-		return productoDao.viewNumTarjeta(numTarjeta, codigo_bancario).flatMap(c -> {
+		return productoDao.consultaNumCuentaByCodBanc(numTarjeta, codigo_bancario).flatMap(c -> {
 			c.setSaldo((c.getSaldo() + monto) - comision);
 			return productoDao.save(c);
 		});
@@ -220,7 +220,7 @@ public class ProductoServiceImpl implements ProductoService {
 	@Override
 	public Mono<CurrentAccount> listProdNumTarj(String num, String codigo_bancario) {
 
-		return productoDao.viewNumTarjeta(num, codigo_bancario);
+		return productoDao.consultaNumCuentaByCodBanc(num, codigo_bancario);
 	}
 
 	@Override

@@ -41,7 +41,7 @@ public class CreditAccount {
 	private String codigo_bancario;
 
 	
-	//private tipoProducto tipoCliente;
+	
 }
 
 
