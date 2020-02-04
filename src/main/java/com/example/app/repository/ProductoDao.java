@@ -1,4 +1,4 @@
-package com.example.app.dao;
+package com.example.app.repository;
 
 
 import java.util.Date;
@@ -19,8 +19,7 @@ import reactor.core.publisher.Mono;
 public interface ProductoDao extends ReactiveMongoRepository<CurrentAccount, String> {
 
 	Flux<CurrentAccount> findByDni(String dni);
-	
-	
+
 	@Query("{ 'numero_cuenta' : ?0 , 'codigo_bancario' : ?1}")
 	Mono<CurrentAccount> consultaNumCuentaByCodBanc(String numero_cuenta, String codigo_bancario);
 	

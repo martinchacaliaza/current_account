@@ -34,6 +34,10 @@ public interface ProductoService {
 	
 	Flux<CurrentAccount> consultaProductosTiempo(Date from, Date to, String codigo_banco);
 
+	Mono<CurrentAccount> listProd(String dni, String codigo_bancario);
+
+
+
 
 
 	

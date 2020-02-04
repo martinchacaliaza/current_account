@@ -12,14 +12,14 @@ import org.springframework.web.client.HttpClientErrorException.BadRequest;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.server.RequestPredicates;
 
-import com.example.app.dao.ProductoDao;
-import com.example.app.dao.TipoProductoDao;
 import com.example.app.exception.RequestException;
 import com.example.app.models.Client;
 import com.example.app.models.CreditAccount;
 import com.example.app.models.CurrentAccount;
 import com.example.app.models.TypeClient;
 import com.example.app.models.TypeCurrentAccount;
+import com.example.app.repository.ProductoDao;
+import com.example.app.repository.TipoProductoDao;
 import com.example.app.service.ProductoService;
 import com.example.app.service.TipoProductoService;
 
@@ -234,6 +234,12 @@ public class ProductoServiceImpl implements ProductoService {
 	public Flux<CurrentAccount> consultaProductosTiempo(Date from, Date to, String codigo_banco) {
 		// TODO Auto-generated method stub
 		return productoDao.consultaProductoBanco(from, to, codigo_banco);
+	}
+
+	@Override
+	public Mono<CurrentAccount> listProd(String dni, String codigo_bancario) {
+		
+		return productoDao.listaProductos(dni, codigo_bancario);
 	}
 
 }

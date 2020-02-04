@@ -107,6 +107,13 @@ public class ProductoControllers {
 		Mono<CurrentAccount> producto = productoService.listProdNumTarj(num, codigo_bancario);
 		return producto;
 	}
+	
+	@ApiOperation(value = "Muestra Cuentas Bancarias por el Dni Cliente y entidad bancaria", notes="")
+	@GetMapping("/dni_codbanco/{dni}/{codigo_bancario}")
+	public Mono<CurrentAccount> listProd(@PathVariable String dni, @PathVariable String codigo_bancario) {
+		Mono<CurrentAccount> producto = productoService.listProd(dni, codigo_bancario);
+		return producto;
+	}
 
 	@ApiOperation(value = "Muestra todos los poductos de cuentas de credito de un cliente", notes="")
 	@GetMapping("/dni/{dni}")
