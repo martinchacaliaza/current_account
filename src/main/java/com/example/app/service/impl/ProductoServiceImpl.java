@@ -1,4 +1,4 @@
-package com.example.app.impl;
+package com.example.app.service.impl;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -14,6 +14,7 @@ import org.springframework.web.reactive.function.server.RequestPredicates;
 
 import com.example.app.dao.ProductoDao;
 import com.example.app.dao.TipoProductoDao;
+import com.example.app.exception.RequestException;
 import com.example.app.models.Client;
 import com.example.app.models.CreditAccount;
 import com.example.app.models.CurrentAccount;
@@ -21,7 +22,7 @@ import com.example.app.models.TypeClient;
 import com.example.app.models.TypeCurrentAccount;
 import com.example.app.service.ProductoService;
 import com.example.app.service.TipoProductoService;
-import com.sistema.app.exception.RequestException;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
