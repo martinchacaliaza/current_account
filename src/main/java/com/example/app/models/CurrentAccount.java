@@ -2,20 +2,17 @@ package com.example.app.models;
 
 import java.util.Date;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
+import javax.validation.constraints.NotEmpty;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.DateTimeFormat;
-
+import com.example.app.models.TypeCurrentAccount;
 import com.fasterxml.jackson.annotation.JsonFormat;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import reactor.core.publisher.Mono;
+
 
 @Getter
 @Setter
@@ -29,7 +26,7 @@ public class CurrentAccount {
 	@NotEmpty
 	private String dni;
 	@NotEmpty
-	private String numero_cuenta;
+	private String numeroCuenta;
 	@NotEmpty
 	private TypeCurrentAccount tipoProducto;
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -43,7 +40,7 @@ public class CurrentAccount {
 	@NotEmpty
 	private String clave;
 	@NotEmpty
-	private String codigo_bancario;
+	private String codigoBancario;
 	
 	
 	@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy")

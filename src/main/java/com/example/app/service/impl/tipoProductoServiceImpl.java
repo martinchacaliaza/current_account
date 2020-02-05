@@ -48,5 +48,6 @@ public class tipoProductoServiceImpl implements TipoProductoService{
 	public Mono<Void> deleteTipo(TypeCurrentAccount tipoProducto) {
 		return tipoProductoDao.delete(tipoProducto);
 	}
+
 	
 }

@@ -1,11 +1,13 @@
-package com.example.app.models;
+package com.example.app.dto;
 
+
+import com.example.app.models.dtoTypeClient;
 
 import lombok.Data;
 
 
 @Data
-public class Client {
+public class dtoClient {
 
 	private String dni;
 	private String nombres;
@@ -14,8 +16,8 @@ public class Client {
 	private String telefono;
 	private String edad;
 	private String correo;
-	private TypeClient tipoCliente;
-	private String codigo_bancario;
+	private dtoTypeClient tipoCliente;
+	private String codigoBancario;
 }
 
 

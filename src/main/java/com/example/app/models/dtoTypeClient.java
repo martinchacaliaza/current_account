@@ -9,7 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class TypeClient {
+public class dtoTypeClient {
 
 
 	private String idTipo;

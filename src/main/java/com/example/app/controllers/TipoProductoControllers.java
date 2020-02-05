@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.example.app.models.TypeCurrentAccount;
 import com.example.app.service.TipoProductoService;
 
@@ -32,7 +33,7 @@ public class TipoProductoControllers {
 		return Mono.just(
 				ResponseEntity
 				.ok()
-				.contentType(MediaType.APPLICATION_JSON_UTF8)
+				.contentType(MediaType.APPLICATION_JSON)
 				.body(tipoProductosService.findAllTipoproducto())
 				);
 	}
@@ -41,7 +42,7 @@ public class TipoProductoControllers {
 	@GetMapping("id/{id}")
 	public Mono<ResponseEntity<TypeCurrentAccount>> viewId2(@PathVariable String id){
 		return tipoProductosService.viewidTipo(id).map(p-> ResponseEntity.ok()
-				.contentType(MediaType.APPLICATION_JSON_UTF8)
+				.contentType(MediaType.APPLICATION_JSON)
 				.body(p))
 				.defaultIfEmpty(ResponseEntity.notFound().build());	
 	}
@@ -50,7 +51,7 @@ public class TipoProductoControllers {
 	@GetMapping("/{id}")
 	public Mono<ResponseEntity<TypeCurrentAccount>> viewId(@PathVariable String id){
 		return tipoProductosService.findByIdTipoProducto(id).map(p-> ResponseEntity.ok()
-				.contentType(MediaType.APPLICATION_JSON_UTF8)
+				.contentType(MediaType.APPLICATION_JSON)
 				.body(p))
 				.defaultIfEmpty(ResponseEntity.notFound().build());	
 	}

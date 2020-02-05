@@ -1,13 +1,10 @@
 package com.example.app.controllers;
 
-import java.net.URI;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-
-import javax.management.RuntimeErrorException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,12 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.app.models.CurrentAccount;
-
-import com.example.app.models.dtoCurrentAccount;
 import com.example.app.models.TypeCurrentAccount;
 import com.example.app.service.ProductoService;
-import com.example.app.service.TipoProductoService;
-
 import io.swagger.annotations.ApiOperation;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -36,14 +29,13 @@ public class ProductoControllers {
 	@Autowired
 	private ProductoService productoService;
 
-	@Autowired
-	private TipoProductoService tipoProductoService;
+
 
 	@ApiOperation(value = "Muestra todos las cuentas bancarias existentes", notes="")
 	@GetMapping
 	public Mono<ResponseEntity<Flux<CurrentAccount>>> findAll() {
 		return Mono.just(
-				ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(productoService.findAllProducto())
+				ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(productoService.findAllProducto())
 
 		);
 	}
@@ -52,7 +44,7 @@ public class ProductoControllers {
 	@GetMapping("/{id}")
 	public Mono<ResponseEntity<CurrentAccount>> viewId(@PathVariable String id) {
 		return productoService.findByIdProducto(id)
-				.map(p -> ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(p))
+				.map(p -> ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(p))
 				.defaultIfEmpty(ResponseEntity.notFound().build());
 	}
 
@@ -98,7 +90,7 @@ public class ProductoControllers {
 	@PostMapping
 	public Flux<CurrentAccount> saveProducto(@RequestBody List<CurrentAccount> pro) {
 		return productoService.saveProductoList(pro);
-				//switchIfEmpty( Mono.error(new RuntimeException("Revisar Datos")));
+			
 	}
 
 	@ApiOperation(value = "Muestra la cuenta bancaria por el numero de tarjeta y entidad bancaria", notes="")
@@ -110,8 +102,8 @@ public class ProductoControllers {
 	
 	@ApiOperation(value = "Muestra Cuentas Bancarias por el Dni Cliente y entidad bancaria", notes="")
 	@GetMapping("/dni_codbanco/{dni}/{codigo_bancario}")
-	public Mono<CurrentAccount> listProd(@PathVariable String dni, @PathVariable String codigo_bancario) {
-		Mono<CurrentAccount> producto = productoService.listProd(dni, codigo_bancario);
+	public Flux<CurrentAccount> listProd(@PathVariable String dni, @PathVariable String codigo_bancario) {
+		Flux<CurrentAccount> producto = productoService.listProd(dni, codigo_bancario);
 		return producto;
 	}
 
@@ -125,15 +117,15 @@ public class ProductoControllers {
 	@ApiOperation(value = "Muestra los saldos de las cuentas de un cliente"
 			+ " se consulta por el numero de cuenta", notes="")
 	@GetMapping("/SaldosBancarios/{numero_cuenta}/{codigo_bancario}")
-	public Mono<dtoCurrentAccount> SaldosBancarios(@PathVariable String numero_cuenta, String codigo_bancario) {
+	public Mono<CurrentAccount> SaldosBancarios(@PathVariable String numero_cuenta, String codigo_bancario) {
 		Mono<CurrentAccount> oper = productoService.listProdNumTarj(numero_cuenta, codigo_bancario);
 		return oper.flatMap(c -> {
-			dtoCurrentAccount pp = new dtoCurrentAccount();
+			CurrentAccount pp = new CurrentAccount();
 			TypeCurrentAccount tp = new TypeCurrentAccount();
 			tp.setIdTipo(c.getTipoProducto().getIdTipo());
 			tp.setDescripcion(c.getTipoProducto().getDescripcion());
 			pp.setDni(c.getDni());
-			pp.setNumero_cuenta(c.getNumero_cuenta());
+			pp.setNumeroCuenta(c.getNumeroCuenta());
 			pp.setSaldo(c.getSaldo());
 			pp.setTipoProducto(tp);
 			return Mono.just(pp);
@@ -149,9 +141,10 @@ public class ProductoControllers {
 		String f1 = fecha1.split("&&")[0]+" 00:00:00.000 +0000";
 		Date from = format.parse(f1);
 		Date to = format.parse(fecha1.split("&&")[1]+" 00:00:00.000 +0000");
-		System.out.println(format.format(from));
-		return productoService.consultaProductosTiempo(from,to, codigo_banco);
-	
+		System.out.println(format.format(from));	
+		return productoService.consultaProductosTiempo(from,to,codigo_banco);
+			
+		
 		}
 }
 

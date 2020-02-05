@@ -12,7 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-import com.example.app.models.CreditAccount;
+import com.example.app.dto.dtoCreditAccount;
 import com.example.app.models.CurrentAccount;
 import com.example.app.service.ProductoService;
 
@@ -38,8 +38,8 @@ class ApplicationCurrentTests {
 		.exchange()
 		.expectStatus().isOk()
 		.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
-		.expectBodyList(CreditAccount.class).consumeWith(response -> {
-			List<CreditAccount> credit = response.getResponseBody();
+		.expectBodyList(dtoCreditAccount.class).consumeWith(response -> {
+			List<dtoCreditAccount> credit = response.getResponseBody();
 			
 			credit.forEach(p -> {
 				System.out.println(p.getDni());
