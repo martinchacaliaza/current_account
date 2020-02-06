@@ -244,4 +244,9 @@ public class ProductoServiceImpl implements ProductoService {
 		return productoDao.findByDniAndCodigoBancario(dni, codigo_bancario);
 	}
 
+	@Override
+	public Mono<Void> deleteCliente(CurrentAccount s) {
+		return productoDao.delete(s);
+	}
+
 }

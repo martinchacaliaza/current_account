@@ -47,6 +47,7 @@ public class CurrentAccount {
 	public Date fecha_afiliacion() {
 		return fecha_afiliacion;
 	}
+	
 	@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy")
 	public Date fecha_caducidad() {
 		return fecha_caducidad;

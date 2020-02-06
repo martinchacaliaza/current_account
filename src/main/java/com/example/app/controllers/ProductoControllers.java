@@ -6,8 +6,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +17,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.example.app.dto.dtoSaldos;
 import com.example.app.models.CurrentAccount;
 import com.example.app.models.TypeCurrentAccount;
 import com.example.app.service.ProductoService;
@@ -54,6 +58,16 @@ public class ProductoControllers {
 	public Mono<CurrentAccount> updateProducto(@RequestBody CurrentAccount producto) {
 
 		return productoService.saveProducto(producto);
+	}
+	
+	@ApiOperation(value = "ELIMINA PRODUCTO POR ID", notes = "")
+	@DeleteMapping("/{id}")
+	public Mono<ResponseEntity<Void>> deleteBanco(@PathVariable String id) {
+		return productoService.findByIdProducto(id).flatMap(s -> {
+			return productoService
+					.deleteCliente(s)
+					.then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)));
+		}).defaultIfEmpty(new ResponseEntity<Void>(HttpStatus.NO_CONTENT));
 	}
 
 	@ApiOperation(value = "actualiza al momento de hacer la transaccion[RETIRO] desde servicio"
@@ -117,13 +131,13 @@ public class ProductoControllers {
 	@ApiOperation(value = "Muestra los saldos de las cuentas de un cliente"
 			+ " se consulta por el numero de cuenta", notes="")
 	@GetMapping("/SaldosBancarios/{numero_cuenta}/{codigo_bancario}")
-	public Mono<CurrentAccount> SaldosBancarios(@PathVariable String numero_cuenta, String codigo_bancario) {
+	public Mono<dtoSaldos> SaldosBancarios(@PathVariable String numero_cuenta,@PathVariable String codigo_bancario) {
 		Mono<CurrentAccount> oper = productoService.listProdNumTarj(numero_cuenta, codigo_bancario);
 		return oper.flatMap(c -> {
-			CurrentAccount pp = new CurrentAccount();
+			dtoSaldos pp = new dtoSaldos();
 			TypeCurrentAccount tp = new TypeCurrentAccount();
 			tp.setIdTipo(c.getTipoProducto().getIdTipo());
-			tp.setDescripcion(c.getTipoProducto().getDescripcion());
+			tp.setDescripcion(c.getTipoProducto().getDescripcion());	
 			pp.setDni(c.getDni());
 			pp.setNumeroCuenta(c.getNumeroCuenta());
 			pp.setSaldo(c.getSaldo());
